@@ -13,7 +13,7 @@ class ProgramArguments:
 
     help_arg_description = 'prints the help section'
 
-    file_name = _file_
+    file_name = __file__
     python_executable = 'python3'
 
 
@@ -58,3 +58,65 @@ def check_help_option():
 def generate_password():
     password = ''
     characters = dict()
+
+    first_charachter = random.choice(string.ascii_uppercase)
+    characters[0] = first_charachter
+
+    first_character = random.choice(string.ascii_uppercase)
+    characters[0] = first_character
+
+    length = random.randint(PasswordCharacteristics.minimum_length, PasswordCharacteristics.maximum_length)
+    special_characters_count = random.randint(PasswordCharacteristics.min_required_characters,
+                                              PasswordCharacteristics.max_required_characters)
+    special_characters_indices = random.sample(population=[i for i in range(1, length)],
+                                               k=special_characters_count)
+
+    for i in special_characters_indices:
+        characters[i] = random.choice(PasswordCharacteristics.required_character)
+
+    for i in range(1, length):
+        if i not in characters:
+            characters[i] = random.choice(string.ascii_letters)
+    for key in characters:
+        password += characters[key]
+
+    return password
+
+
+def filter_words_by_length(file_name):
+    try:
+        words_by_len = []
+        with open(file_name) as dict_file:
+            for line in dict_file.readlines():
+                line = line.rstrip().capitalize()
+                if len(line) >= 18:
+                    continue
+                words_by_len.append((len(line), line))
+            dict_file.close()
+
+            return sorted(words_by_len, key=lambda t: t[0])
+    except IOError as FileOpenError:
+        print('File given is invalid / cannot be opened')
+        exit(2)
+
+
+def assign_in_buckets(words_by_len):
+    buckets = dict()
+    for len_word_tuple in words_by_len:
+        if len_word_tuple[0] not in buckets:
+            buckets[len_word_tuple[0]] = [len_word_tuple[1]]
+        else:
+            buckets[len_word_tuple[0]].append(len_word_tuple[1])
+
+    for key in buckets:
+        buckets[key].sort()
+
+    return buckets
+
+
+def gen_word_lengths(total_length):
+    current_len = random.randint(3, 8)
+    while current_len < total_length and total_length - current_len > 3:
+        total_length -= current_len
+        yield current_len
+    yield total_length
